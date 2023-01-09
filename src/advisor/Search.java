@@ -68,7 +68,12 @@ class SearchFactory {
             case "new" :   return new SearchNew();
             case "featured" : return new SearchFeatured();
             case "categories" : return new SearchCategories();
-            case "playlists" : return new SearchPlaylist(request[1]);
+            case "playlists" :
+                try {
+                    return new SearchPlaylist(request[1]);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                break;
+                }
             case "exit" : return new Exit();
             default : break;
             }
