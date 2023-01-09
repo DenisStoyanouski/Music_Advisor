@@ -15,6 +15,7 @@ class Search {
                 case "playlists" : getPlaylist(request[1]);
                     break;
                 case "exit" : exit();
+                    System.exit(0);
                     break;
                 default :
                     System.out.println("Unknown command");
@@ -31,18 +32,29 @@ class Search {
 
     private static void getFeatured() {
         System.out.println("---FEATURED---");
+        System.out.println("Mellow Morning");
+        System.out.println("Wake Up and Smell the Coffee");
+        System.out.println("Monday Motivation");
+        System.out.println("Songs to Sing in the Shower");
     }
 
     private static void getCategories() {
         System.out.println("---CATEGORIES---");
+        System.out.println("Top Lists");
+        System.out.println("Pop");
+        System.out.println("Mood");
+        System.out.println("playlists Mood");
     }
 
     private static void getPlaylist(String s) {
-        System.out.println(String.format("---playlist %s---", s));
+        System.out.println(String.format("---%s PLAYLISTS---", s.toUpperCase()));
+        System.out.println("Walk Like A Badass");
+        System.out.println("Rage Beats");
+        System.out.println("Arab Mood Booster");
+        System.out.println("Sunday Stroll");
     }
 
     private static void exit() {
-        System.out.println("---GOODBYE!---");
-        System.exit(0);
+        System.out.print("---GOODBYE!---");
     }
 }
