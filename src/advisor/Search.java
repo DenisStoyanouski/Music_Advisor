@@ -7,7 +7,7 @@ interface Search {
 class SearchNew implements Search{
     @Override
     public void printResult() {
-        System.out.println("---NEW RELEASES---");
+        System.out.printf("---%s---%n", Mode.NEW.getName());
         System.out.println("Mountains [Sia, Diplo, Labrinth]");
         System.out.println("Runaway [Lil Peep]");
         System.out.println("The Greatest Show [Panic! At The Disco]");
@@ -18,7 +18,7 @@ class SearchNew implements Search{
 class SearchFeatured implements Search{
     @Override
     public void printResult() {
-        System.out.println("---FEATURED---");
+        System.out.printf("---%s---%n", Mode.FEATURED.getName());
         System.out.println("Mellow Morning");
         System.out.println("Wake Up and Smell the Coffee");
         System.out.println("Monday Motivation");
@@ -29,7 +29,7 @@ class SearchFeatured implements Search{
 class SearchCategories implements Search{
     @Override
     public void printResult() {
-        System.out.println("---CATEGORIES---");
+        System.out.printf("---%s---%n", Mode.CATEGORIES.getName());
         System.out.println("Top Lists");
         System.out.println("Pop");
         System.out.println("Mood");
@@ -44,7 +44,7 @@ class SearchPlaylist implements Search{
     }
     @Override
     public void printResult() {
-        System.out.println(String.format("---%s PLAYLISTS---", list.toUpperCase()));
+        System.out.printf("---%s %s---%n", list.toUpperCase(), Mode.PLAYLISTS.getName());
         System.out.println("Walk Like A Badass");
         System.out.println("Rage Beats");
         System.out.println("Arab Mood Booster");
@@ -55,7 +55,7 @@ class SearchPlaylist implements Search{
 class Exit implements Search{
     @Override
     public void printResult() {
-        System.out.print("---GOODBYE!---");
+        System.out.printf("---%s---%n", Mode.EXIT.getName());
         System.exit(0);
     }
 }
@@ -64,15 +64,33 @@ class Exit implements Search{
 class SearchFactory {
 
     static Search produce(String[] request) {
-
-            switch(request[0]) {
-                case "new" :  return new SearchNew();
-                case "featured" : return new SearchFeatured();
-                case "categories" : return new SearchCategories();
-                case "playlists" : return new SearchPlaylist(request[1]);
-                case "exit" : return new Exit();
-                default : break;
+        switch(request[0]) {
+            case "new" :   return new SearchNew();
+            case "featured" : return new SearchFeatured();
+            case "categories" : return new SearchCategories();
+            case "playlists" : return new SearchPlaylist(request[1]);
+            case "exit" : return new Exit();
+            default : break;
             }
             return null;
+            
+    }
+}
+
+enum Mode {
+    NEW ("NEW RELEASES"),
+    FEATURED ("FEATURED"),
+    CATEGORIES("CATEGORIES"),
+    PLAYLISTS("PLAYLISTS"),
+    EXIT("GOODBYE!");
+    
+    String name;
+    
+    Mode(String name) {
+        this.name = name;
+    }
+    
+    public String getName() {
+        return name;
     }
 }
