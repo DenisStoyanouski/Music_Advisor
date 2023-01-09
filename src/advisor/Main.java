@@ -6,7 +6,15 @@ public class Main {
     public static void main(String[] args) {
         while (true) {
             String[] request = input().split("\\s");
-            Search.getRequest(request);
+            final SearchFactory searchFactory = new SearchFactory();
+            final Search search = searchFactory.produce(request);
+            assert search != null;
+            if (search != null) {
+                search.printResult();
+            } else {
+                System.out.println("Unknown command");
+            }
+
         }
 
     }

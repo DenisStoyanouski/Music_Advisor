@@ -1,60 +1,78 @@
 package advisor;
 
+interface Search {
+    void printResult();
+}
 
-class Search {
-
-    static void getRequest(String[] request) {
-
-            switch(request[0]) {
-                case "new" :  getNew();
-                    break;
-                case "featured" : getFeatured();
-                    break;
-                case "categories" : getCategories();
-                    break;
-                case "playlists" : getPlaylist(request[1]);
-                    break;
-                case "exit" : exit();
-                    System.exit(0);
-                    break;
-                default :
-                    System.out.println("Unknown command");
-            }
-    }
-
-    private static void getNew() {
+class SearchNew implements Search{
+    @Override
+    public void printResult() {
         System.out.println("---NEW RELEASES---");
         System.out.println("Mountains [Sia, Diplo, Labrinth]");
         System.out.println("Runaway [Lil Peep]");
         System.out.println("The Greatest Show [Panic! At The Disco]");
         System.out.println("All Out Life [Slipknot]");
     }
+}
 
-    private static void getFeatured() {
+class SearchFeatured implements Search{
+    @Override
+    public void printResult() {
         System.out.println("---FEATURED---");
         System.out.println("Mellow Morning");
         System.out.println("Wake Up and Smell the Coffee");
         System.out.println("Monday Motivation");
         System.out.println("Songs to Sing in the Shower");
     }
+}
 
-    private static void getCategories() {
+class SearchCategories implements Search{
+    @Override
+    public void printResult() {
         System.out.println("---CATEGORIES---");
         System.out.println("Top Lists");
         System.out.println("Pop");
         System.out.println("Mood");
         System.out.println("playlists Mood");
     }
+}
 
-    private static void getPlaylist(String s) {
-        System.out.println(String.format("---%s PLAYLISTS---", s.toUpperCase()));
+class SearchPlaylist implements Search{
+    final private String list;
+    public SearchPlaylist(String list) {
+        this.list = list;
+    }
+    @Override
+    public void printResult() {
+        System.out.println(String.format("---%s PLAYLISTS---", list.toUpperCase()));
         System.out.println("Walk Like A Badass");
         System.out.println("Rage Beats");
         System.out.println("Arab Mood Booster");
         System.out.println("Sunday Stroll");
     }
+}
 
-    private static void exit() {
+class Exit implements Search{
+    @Override
+    public void printResult() {
         System.out.print("---GOODBYE!---");
+        System.exit(0);
+    }
+}
+
+
+class SearchFactory {
+
+    static Search produce(String[] request) {
+
+            switch(request[0]) {
+                case "new" :  return new SearchNew();
+                case "featured" : return new SearchFeatured();
+                case "categories" : return new SearchCategories();
+                case "playlists" : return new SearchPlaylist(request[1]);
+                case "exit" : return new Exit();
+                default : break;
+            }
+            return null;
     }
 }
