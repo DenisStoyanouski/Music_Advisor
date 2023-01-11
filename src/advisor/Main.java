@@ -3,19 +3,25 @@ package advisor;
 import java.util.Scanner;
 
 public class Main {
+    final private static String IP = "https://accounts.spotify.com/authorize";
 
-    final private String CLIENT_ID = "59968b64e44b43bcaa61049eaae7b6e7";
+    final private static String CLIENT_ID = "59968b64e44b43bcaa61049eaae7b6e7";
 
-    final private String REDIRECT_URI = "http://mysite.com/callback/";
+    final private static String REDIRECT_URI = "http://mysite.com/callback/";
 
-    static final private String LINK = "https://accounts.spotify.com/authorize?client_id=a19ee7dbfda443b2a8150c9101bfd645&redirect_uri=http://localhost:8080&response_type=code";
 
     public static void main(String[] args) {
-        String line;
-        do {
+        String line = null;
+        while (!"auth".equals(line)) {
             line = input();
-            System.out.println("Please, provide access for application.");
-        } while (!"auth".equals(line));
+            if ("auth".equals(line)) {
+                break;
+            } else if ("exit".equals(line)) {
+                System.exit(0);
+            } else {
+                System.out.println("Please, provide access for application.");
+            }
+        }
 
         if (authorization()) {
             while (true) {
@@ -35,15 +41,22 @@ public class Main {
 
     private static boolean authorization() {
         boolean success = false;
-        String link = input();
-        do {
+        /*String link;
+        link = input();*/
+        System.out.printf("%s?client_id=%s&redirect_uri=%s&response_type=code%n", IP, CLIENT_ID, REDIRECT_URI);
+        System.out.println("---SUCCESS---");
+        success = true;
+        /*do {
+            link = input();
+            System.out.println("---SUCCESS---");
             if (link.equals(LINK)) {
                 System.out.println("---SUCCESS---");
                 success = true;
             } else {
-                System.out.println("Link does not exist");
+                System.exit(0);
+                System.out.println("Link does not exist. Try again:");
             }
-        } while(!success);
+        } while(!success);*/
 
         return success;
     }
