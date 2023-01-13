@@ -11,10 +11,14 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
-    final private static String IP = "https://accounts.spotify.com/authorize";
+    private static String ip = "https://accounts.spotify.com";
+
+    private static String endpoint;
 
     final private static String CLIENT_ID = "59968b64e44b43bcaa61049eaae7b6e7";
 
@@ -30,6 +34,13 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        if (args.length > 1) {
+            ip = args[1];
+        }
+        for (String str : args) {}
+
+
+
         String line = null;
         while (!"auth".equals(line)) {
             line = input();
@@ -43,7 +54,7 @@ public class Main {
             }
         }
 
-        if (!isSuccess) {
+        if (isSuccess) {
             while (true) {
                 String[] request = input().split("\\s");
                 final SearchFactory searchFactory = new SearchFactory();
@@ -61,13 +72,12 @@ public class Main {
 
     private static void authorization() throws IOException, InterruptedException {
         System.out.println("use this link to request the access code:");
-        System.out.printf("%s?client_id=%s&redirect_uri=%s&response_type=code%n", IP, CLIENT_ID, REDIRECT_URI);
+        System.out.printf("%s?client_id=%s&redirect_uri=%s&response_type=code%n", ip, CLIENT_ID, REDIRECT_URI);
         isSuccess = false;
         getCode();
-        Thread.sleep(10000);
+        Thread.sleep(5000);
         getAccessToken();
-        Thread.sleep(10000);
-        System.out.println("---SUCCESS---");
+        Thread.sleep(5000);
         isSuccess = true;
     }
 
@@ -106,6 +116,9 @@ public class Main {
     }
 
     private static void getAccessToken() throws IOException, InterruptedException {
+        if (code == null) {
+            return;
+        }
         System.out.println("making http request for access_token...");
         String encoded = Base64.getEncoder().encodeToString(String.format("%s:%s",CLIENT_ID, CLIENT_SECRET).getBytes());
 
@@ -120,7 +133,11 @@ public class Main {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        System.out.println(response.body());
+        if (response.body().contains("access_token")) {
+            System.out.println(response.body());
+            System.out.println("---SUCCESS---");
+
+        }
     }
 }
 
