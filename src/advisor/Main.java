@@ -1,5 +1,11 @@
 package advisor;
 
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Scanner;
 
 public class Main {
@@ -7,14 +13,21 @@ public class Main {
 
     final private static String CLIENT_ID = "59968b64e44b43bcaa61049eaae7b6e7";
 
-    final private static String REDIRECT_URI = "http://mysite.com/callback/";
+    final private static String REDIRECT_URI = "http://localhost:8888";
+
+    private static String code;
+
+    private static boolean isSuccess;
 
 
-    public static void main(String[] args) {
+
+
+    public static void main(String[] args) throws IOException {
         String line = null;
         while (!"auth".equals(line)) {
             line = input();
             if ("auth".equals(line)) {
+                authorization();
                 break;
             } else if ("exit".equals(line)) {
                 System.exit(0);
@@ -23,7 +36,7 @@ public class Main {
             }
         }
 
-        if (authorization()) {
+        if (!isSuccess) {
             while (true) {
                 String[] request = input().split("\\s");
                 final SearchFactory searchFactory = new SearchFactory();
@@ -39,31 +52,49 @@ public class Main {
 
     }
 
-    private static boolean authorization() {
-        boolean success = false;
-        /*String link;
-        link = input();*/
+    private static void authorization() throws IOException {
+        System.out.println("use this link to request the access code:");
         System.out.printf("%s?client_id=%s&redirect_uri=%s&response_type=code%n", IP, CLIENT_ID, REDIRECT_URI);
-        System.out.println("---SUCCESS---");
-        success = true;
-        /*do {
-            link = input();
-            System.out.println("---SUCCESS---");
-            if (link.equals(LINK)) {
-                System.out.println("---SUCCESS---");
-                success = true;
-            } else {
-                System.exit(0);
-                System.out.println("Link does not exist. Try again:");
-            }
-        } while(!success);*/
+        isSuccess = false;
 
-        return success;
+
+
+
+        System.out.println("---SUCCESS---");
+        isSuccess = true;
     }
 
     public static String input() {
         Scanner scanner = new Scanner(System.in);
         return scanner.nextLine();
+    }
+
+    private static void getCode() throws IOException {
+
+        HttpServer server = HttpServer.create();
+        server.bind(new InetSocketAddress(8888), 50);
+        server.createContext("/",
+                new HttpHandler() {
+                    public void handle(HttpExchange exchange) throws IOException {
+                        String query = exchange.getRequestURI().getQuery();
+                        String hello = null;
+                        if (query.contains("error=access_denied")) {
+                            hello = "Authorization code not found. Try again.";
+                            exchange.sendResponseHeaders(200, hello.length());
+                            exchange.getResponseBody().write(hello.getBytes());
+                            exchange.getResponseBody().close();
+                        } else if (query.contains("code=")) {
+                            code = query.replaceAll("code=", "");
+                            hello = "Got the code. Return back to your program.";
+                            exchange.sendResponseHeaders(200, hello.length());
+                            exchange.getResponseBody().write(hello.getBytes());
+                            exchange.getResponseBody().close();
+                            server.stop(1);
+                        }
+                    }
+                }
+        );
+        server.start();
     }
 }
 
