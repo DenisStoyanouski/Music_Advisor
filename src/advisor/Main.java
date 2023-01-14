@@ -21,14 +21,16 @@ public class Main {
         for (int i = 0; i < args.length; i += 2) {
             arguments.put(args[i].replaceAll("-",""), args[i + 1]);
         }
-        ip = arguments.getOrDefault("access", "https://accounts.spotify.com/authorize");
+        ip = arguments.getOrDefault("access", "https://accounts.spotify.com");
         resource = arguments.getOrDefault("resource", "https://api.spotify.com");
     }
 
 
 }
 class Engine {
-    private static boolean isAuthorized = false;
+    private static String accessToken;
+
+
 
     static void start(String ip, String resource) throws IOException, InterruptedException {
         String line = null;
@@ -36,7 +38,7 @@ class Engine {
             line = input();
             if ("auth".equals(line)) {
                 Authorization authorization = new Authorization(ip);
-                isAuthorized = authorization.isAuthorization();
+                accessToken = authorization.isAuthorization();
                 break;
             } else if ("exit".equals(line)) {
                 System.exit(0);
@@ -45,11 +47,11 @@ class Engine {
             }
         }
 
-        if (isAuthorized) {
+        if (!accessToken.isEmpty()) {
             while (true) {
                 String[] request = input().split("\\s");
                 final SearchFactory searchFactory = new SearchFactory();
-                final Search search = searchFactory.produce(request, resource);
+                final Search search = searchFactory.produce(request, resource, accessToken);
                 assert search != null;
                 if (search != null) {
                     search.printResult();

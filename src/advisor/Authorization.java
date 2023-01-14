@@ -31,17 +31,14 @@ class Authorization {
 
 
 
-    boolean isAuthorization() throws IOException, InterruptedException {
-        boolean isAuthorization = false;
+    String isAuthorization() throws IOException, InterruptedException {
         System.out.println("use this link to request the access code:");
-        System.out.printf("%s?client_id=%s&redirect_uri=%s&response_type=code%n", ip, CLIENT_ID, REDIRECT_URI);
+        System.out.printf("%s/authorize?client_id=%s&redirect_uri=%s&response_type=code%n", ip, CLIENT_ID, REDIRECT_URI);
         getCode();
-        Thread.sleep(5000);
-        if (getAccessToken()) {
-            Thread.sleep(5000);
-            isAuthorization = true;
-        };
-        return isAuthorization;
+        Thread.sleep(10000);
+        getAccessToken();
+        Thread.sleep(10000);
+        return accessToken;
     }
 
     private void getCode() throws IOException {
@@ -92,8 +89,7 @@ class Authorization {
 
         if (accessToken.contains("access_token")) {
             isAccessToken = true;
-            System.out.println(accessToken);
-            System.out.println("---SUCCESS---");
+            System.out.println("Success!");
         }
         return isAccessToken;
     }

@@ -63,7 +63,7 @@ class Exit implements Search{
 
 class SearchFactory {
 
-    static Search produce(String[] request, String resource) {
+    static Search produce(String[] request, String resource, String token) {
         switch(request[0]) {
             case "new" :   return new SearchNew();
             case "featured" : return new SearchFeatured();
