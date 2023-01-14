@@ -1,22 +1,41 @@
 package advisor;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
-    private static String ip = "https://accounts.spotify.com/authorize";
 
-    private static boolean isAuthorized = false;
+    private static String ip;
+    private static String resource;
+
+    private static final Map<String, String> arguments = new HashMap<>();
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        getArguments(args);
+        Engine.start(ip, resource);
+    }
 
-        getIp(args);
+    private static void getArguments(String[] args) {
+        for (int i = 0; i < args.length; i += 2) {
+            arguments.put(args[i].replaceAll("-",""), args[i + 1]);
+        }
+        ip = arguments.getOrDefault("access", "https://accounts.spotify.com/authorize");
+        resource = arguments.getOrDefault("resource", "https://api.spotify.com");
+    }
 
+
+}
+class Engine {
+    private static boolean isAuthorized = false;
+
+    static void start(String ip, String resource) throws IOException, InterruptedException {
         String line = null;
         while (!"auth".equals(line)) {
             line = input();
             if ("auth".equals(line)) {
-                Authorization authorization = authorization = new Authorization(ip);
+                Authorization authorization = new Authorization(ip);
                 isAuthorized = authorization.isAuthorization();
                 break;
             } else if ("exit".equals(line)) {
@@ -30,7 +49,7 @@ public class Main {
             while (true) {
                 String[] request = input().split("\\s");
                 final SearchFactory searchFactory = new SearchFactory();
-                final Search search = searchFactory.produce(request);
+                final Search search = searchFactory.produce(request, resource);
                 assert search != null;
                 if (search != null) {
                     search.printResult();
@@ -39,20 +58,10 @@ public class Main {
                 }
             }
         }
-
     }
-
-    private static void getIp(String[] args) {
-        if (args.length > 1) {
-            ip = args[1];
-        }
-    }
-
     public static String input() {
         Scanner scanner = new Scanner(System.in);
         return scanner.nextLine();
     }
-
-
 }
 
