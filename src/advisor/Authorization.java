@@ -1,5 +1,8 @@
 package advisor;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -9,6 +12,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Base64;
 
 class Authorization {
@@ -37,7 +41,6 @@ class Authorization {
         getCode();
         Thread.sleep(10000);
         getAccessToken();
-        Thread.sleep(10000);
         return accessToken;
     }
 
@@ -75,7 +78,7 @@ class Authorization {
         System.out.println("making http request for access_token...");
         String encoded = Base64.getEncoder().encodeToString(String.format("%s:%s",CLIENT_ID, CLIENT_SECRET).getBytes());
 
-        HttpClient client = HttpClient.newBuilder().build();
+        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
 
         HttpRequest request = HttpRequest.newBuilder()
                 .header("Content-Type", "application/x-www-form-urlencoded")
@@ -85,12 +88,20 @@ class Authorization {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        accessToken = response.body();
-
+        if (response.statusCode() == 200) {
+            accessToken = parseToken(response.body());
+        }
         if (accessToken.contains("access_token")) {
             isAccessToken = true;
             System.out.println("Success!");
         }
         return isAccessToken;
+    }
+
+    private String parseToken(String body) {
+        JsonElement jsonElement = JsonParser.parseString(body);
+        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        System.out.println(jsonObject.get("access_token"));
+        return jsonObject.get("access_token").getAsString();
     }
 }
