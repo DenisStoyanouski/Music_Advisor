@@ -24,13 +24,11 @@ interface Search {
 
 }
 
-class SearchNew implements Search{
+class SearchNew implements Search {
 
     final private String resource;
 
     final private String token;
-
-    private String print;
 
     public SearchNew(String resource, String token) {
         this.resource = resource;
@@ -40,24 +38,14 @@ class SearchNew implements Search{
     @Override
     public void makeRequest() throws InterruptedException, IOException {
 
-        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
-
         String path = "/v1/browse/new-releases";
-        HttpRequest request = HttpRequest.newBuilder()
-                .header("Authorization", "Bearer " + token)
-                .header("Content-Type", "application/json")
-                .uri(URI.create(String.format("%s%s", resource, path)))
-                .GET()
-                .build();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = new Request(resource, path, token).getRequest();
 
         if (response.statusCode() == 200) {
             parseResponse(response.body());
         } else {
-            JsonObject jo = JsonParser.parseString(response.body()).getAsJsonObject();
-            JsonObject error = jo.getAsJsonObject("error");
-            System.out.println(error.getAsJsonObject().get("message").getAsString());
+            System.out.println(response.statusCode());
         }
 
     }
@@ -93,6 +81,8 @@ class SearchFeatured implements Search{
 
     private final String token;
 
+    private String path = "/v1/browse/featured-playlists";
+
     public SearchFeatured(String resource, String token) {
         this.resource = resource;
         this.token = token;
@@ -100,24 +90,13 @@ class SearchFeatured implements Search{
 
     @Override
     public void makeRequest() throws InterruptedException, IOException {
-        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
 
-        String path = "/v1/browse/featured-playlists";
-        HttpRequest request = HttpRequest.newBuilder()
-                .header("Authorization", "Bearer " + token)
-                .header("Content-Type", "application/json")
-                .uri(URI.create(String.format("%s%s", resource, path)))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = new Request(resource, path, token).getRequest();
 
         if (response.statusCode() == 200) {
             parseResponse(response.body());
         } else {
-            JsonObject jo = JsonParser.parseString(response.body()).getAsJsonObject();
-            JsonObject error = jo.getAsJsonObject("error");
-            System.out.println(error.getAsJsonObject().get("message").getAsString());
+            System.out.println(response.statusCode());
         }
     }
 
@@ -160,9 +139,7 @@ class SearchCategories implements Search{
         if (response.statusCode() == 200) {
             parseResponse(response.body());
         } else {
-            JsonObject jo = JsonParser.parseString(response.body()).getAsJsonObject();
-            JsonObject error = jo.getAsJsonObject("error");
-            System.out.println(error.getAsJsonObject().get("message").getAsString());
+            System.out.println(response.statusCode());
         }
     }
 
@@ -188,7 +165,9 @@ class SearchPlaylist implements Search{
     private String resource;
     private String token;
 
-    final private String path = "v1/browse/categories/{category_id}/playlists";
+    private String categoryId;
+
+    private String path; // v1/browse/categories/{category_id}/playlists
 
     public SearchPlaylist(String list, String resource, String token) {
         this.list = list;
@@ -198,34 +177,50 @@ class SearchPlaylist implements Search{
 
     @Override
     public void makeRequest() throws InterruptedException, IOException {
-        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .header("Authorization", "Bearer " + token)
-                .header("Content-Type", "application/json")
-                .uri(URI.create(String.format("%s%s", resource, path)))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        path = "/v1/browse/categories";
+        //get {category_id}
+        HttpResponse<String> response = new Request(resource, path, token).getRequest();
 
         if (response.statusCode() == 200) {
-            parseResponse(response.body());
+            getCategoryId(response.body());
+            System.out.println(categoryId);
         } else {
-            JsonObject jo = JsonParser.parseString(response.body()).getAsJsonObject();
-            JsonObject error = jo.getAsJsonObject("error");
-            System.out.println(error.getAsJsonObject().get("message").getAsString());
+            System.out.println(response.statusCode());
         }
     }
 
     @Override
     public void parseResponse(String body) {
+        JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
+        JsonObject playlists = jo.getAsJsonObject("categories");
+        JsonArray items = playlists.getAsJsonArray("items");
 
+        for(JsonElement item : items) {
+            if (item.getAsJsonObject().get("name").getAsString().equals(list)) {
+                categoryId = item.getAsJsonObject().get("id").getAsString();
+            }
+        }
     }
 
     @Override
     public void printResult() {
 
+    }
+
+    public void getCategoryId(String body) {
+        JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
+        JsonObject playlists = jo.getAsJsonObject("categories");
+        JsonArray items = playlists.getAsJsonArray("items");
+
+        for (JsonElement item : items) {
+            if (item.getAsJsonObject().get("name").getAsString().equals(list)) {
+                categoryId = item.getAsJsonObject().get("id").getAsString();
+                System.out.println(categoryId);
+            }
+        }
+        if (categoryId == null) {
+            System.out.println("Unknown category name.");
+        }
     }
 }
 
@@ -251,13 +246,20 @@ class Exit implements Search{
 class SearchFactory {
 
     static Search produce(String[] request, String resource, String token) {
+        StringBuilder listName = new StringBuilder();
+        if (request.length > 1) {
+            for (int i = 1; i < request.length; i++) {
+                listName.append(request[i]);
+            }
+        }
+
         switch(request[0]) {
             case "new" :   return new SearchNew(resource, token);
             case "featured" : return new SearchFeatured(resource, token);
             case "categories" : return new SearchCategories(resource, token);
             case "playlists" :
                 try {
-                    return new SearchPlaylist(request[1], resource, token);
+                    return new SearchPlaylist(listName.toString(), resource, token);
                 } catch (ArrayIndexOutOfBoundsException e) {
                 break;
                 }
