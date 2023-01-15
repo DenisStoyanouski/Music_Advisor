@@ -183,22 +183,31 @@ class SearchPlaylist implements Search{
 
         if (response.statusCode() == 200) {
             getCategoryId(response.body());
-            System.out.println(categoryId);
         } else {
             System.out.println(response.statusCode());
+        }
+
+        if (categoryId == null || categoryId.matches("\\b[-._~:/?#\\]\\[@!$&'()*+,;=A-Za-z\\d]*\\b")) {
+            System.out.println("Unknown category name.");
+        } else {
+            path = String.format("/v1/playlists/%s", categoryId);
+            HttpResponse<String> response1 = new Request(resource, path, token).getRequest();
+            if (response.statusCode() == 200) {
+                parseResponse(response1.body());
+            } else {
+                System.out.println(response1.statusCode());
+            }
         }
     }
 
     @Override
     public void parseResponse(String body) {
         JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
-        JsonObject playlists = jo.getAsJsonObject("categories");
-        JsonArray items = playlists.getAsJsonArray("items");
+        JsonObject tracks = jo.getAsJsonObject("tracks");
+        JsonArray items = tracks.getAsJsonArray("items");
 
         for(JsonElement item : items) {
-            if (item.getAsJsonObject().get("name").getAsString().equals(list)) {
-                categoryId = item.getAsJsonObject().get("id").getAsString();
-            }
+            item.getAsJsonObject().get("name").getAsString();
         }
     }
 
@@ -217,9 +226,6 @@ class SearchPlaylist implements Search{
                 categoryId = item.getAsJsonObject().get("id").getAsString();
                 System.out.println(categoryId);
             }
-        }
-        if (categoryId == null) {
-            System.out.println("Unknown category name.");
         }
     }
 }
@@ -249,7 +255,7 @@ class SearchFactory {
         StringBuilder listName = new StringBuilder();
         if (request.length > 1) {
             for (int i = 1; i < request.length; i++) {
-                listName.append(request[i]);
+                listName.append(request[i]).append(" ");
             }
         }
 
@@ -259,7 +265,7 @@ class SearchFactory {
             case "categories" : return new SearchCategories(resource, token);
             case "playlists" :
                 try {
-                    return new SearchPlaylist(listName.toString(), resource, token);
+                    return new SearchPlaylist(listName.toString().trim(), resource, token);
                 } catch (ArrayIndexOutOfBoundsException e) {
                 break;
                 }
