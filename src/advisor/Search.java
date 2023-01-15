@@ -9,11 +9,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.sql.SQLOutput;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 interface Search {
 
@@ -28,11 +26,9 @@ interface Search {
 
 class SearchNew implements Search{
 
-    private String resource;
+    final private String resource;
 
-    private String token;
-
-    final private String PATH = "/v1/browse/new-releases";
+    final private String token;
 
     private String print;
 
@@ -46,10 +42,11 @@ class SearchNew implements Search{
 
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
 
+        String path = "/v1/browse/new-releases";
         HttpRequest request = HttpRequest.newBuilder()
                 .header("Authorization", "Bearer " + token.replaceAll("access_token:", ""))
                 .header("Content-Type", "application/json")
-                .uri(URI.create(String.format("%s%s", resource, PATH)))
+                .uri(URI.create(String.format("%s%s", resource, path)))
                 .GET()
                 .build();
 
@@ -88,11 +85,9 @@ class SearchNew implements Search{
 
 class SearchFeatured implements Search{
 
-    private String resource;
+    private final String resource;
 
-    private String token;
-
-    final private String PATH = "/v1/browse/featured-playlists";
+    private final String token;
 
     public SearchFeatured(String resource, String token) {
         this.resource = resource;
@@ -103,10 +98,11 @@ class SearchFeatured implements Search{
     public void makeRequest() throws InterruptedException, IOException {
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
 
+        String path = "/v1/browse/featured-playlists";
         HttpRequest request = HttpRequest.newBuilder()
                 .header("Authorization", "Bearer " + token.replaceAll("access_token:", ""))
                 .header("Content-Type", "application/json")
-                .uri(URI.create(String.format("%s%s", resource, PATH)))
+                .uri(URI.create(String.format("%s%s", resource, path)))
                 .GET()
                 .build();
 
@@ -139,11 +135,11 @@ class SearchFeatured implements Search{
 
 class SearchCategories implements Search{
 
-    private String resource;
+    private final String resource;
 
-    private String token;
+    private final String token;
 
-    final private String PATH = "/v1/browse/categories";
+    final private String path = "/v1/browse/categories";
 
     public SearchCategories(String resource, String token) {
         this.resource = resource;
@@ -151,22 +147,38 @@ class SearchCategories implements Search{
     }
 
     @Override
-    public void makeRequest() throws InterruptedException, IOException {
+    public void makeRequest() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
 
+        HttpRequest request = HttpRequest.newBuilder()
+                .header("Authorization", "Bearer " + token.replaceAll("access_token:", ""))
+                .header("Content-Type", "application/json")
+                .uri(URI.create(String.format("%s%s", resource, path)))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            parseResponse(response.body());
+        } else {
+            System.out.println(response.statusCode());
+        }
     }
 
     @Override
     public void parseResponse(String body) {
+        JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
+        JsonObject playlists = jo.getAsJsonObject("categories");
+        JsonArray items = playlists.getAsJsonArray("items");
 
+        for(JsonElement item : items) {
+            System.out.println(item.getAsJsonObject().get("name").getAsString());
+        }
     }
 
     @Override
     public void printResult() {
-        System.out.printf("---%s---%n", Mode.CATEGORIES.getName());
-        System.out.println("Top Lists");
-        System.out.println("Pop");
-        System.out.println("Mood");
-        System.out.println("playlists Mood");
     }
 }
 
