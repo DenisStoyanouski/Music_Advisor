@@ -1,13 +1,18 @@
 package advisor;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.SQLOutput;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 interface Search {
 
@@ -26,7 +31,7 @@ class SearchNew implements Search{
 
     private String token;
 
-    final private String PATH = "/v1/browse/categories";
+    final private String PATH = "/v1/browse/new-releases";
 
     private String print;
 
@@ -49,9 +54,6 @@ class SearchNew implements Search{
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response.statusCode());
-        System.out.println(response.body());
-        System.out.println(response.uri().isAbsolute());
         if (response.statusCode() == 200) {
             parseResponse(response.body());
         }
@@ -60,12 +62,22 @@ class SearchNew implements Search{
 
     @Override
     public void parseResponse(String body) {
-        System.out.println(body);
-        JsonElement jsonElement = JsonParser.parseString(body);
+        JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
+        JsonObject albumsObj = jo.getAsJsonObject("albums");
+        JsonArray itemsObj = albumsObj.getAsJsonArray("items");
 
-
-
-
+        for (JsonElement item : itemsObj) {
+            JsonObject itemObj = item.getAsJsonObject();
+            System.out.println(itemObj.get("name").getAsString());
+            JsonArray artists = itemObj.get("artists").getAsJsonArray();
+            List<String> artistList = new ArrayList<>();
+            for (JsonElement artist : artists) {
+                artistList.add(artist.getAsJsonObject().get("name").getAsString());
+            }
+            System.out.println(artistList);
+            System.out.println(itemObj.get("external_urls").getAsJsonObject().get("spotify").getAsString());
+            System.out.println();
+        }
     }
 
     @Override
@@ -174,7 +186,7 @@ class SearchPlaylist implements Search{
 class Exit implements Search{
     @Override
     public void getRequest() {
-
+        printResult();
     }
 
     @Override

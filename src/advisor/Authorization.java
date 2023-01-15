@@ -73,8 +73,7 @@ class Authorization {
         server.start();
     }
 
-    private boolean getAccessToken() throws IOException, InterruptedException {
-        boolean isAccessToken = false;
+    private void getAccessToken() throws IOException, InterruptedException {
         System.out.println("making http request for access_token...");
         String encoded = Base64.getEncoder().encodeToString(String.format("%s:%s",CLIENT_ID, CLIENT_SECRET).getBytes());
 
@@ -92,10 +91,8 @@ class Authorization {
             accessToken = parseToken(response.body());
         }
         if (accessToken.contains("access_token")) {
-            isAccessToken = true;
             System.out.println("Success!");
         }
-        return isAccessToken;
     }
 
     private String parseToken(String body) {
