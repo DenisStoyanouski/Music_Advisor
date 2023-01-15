@@ -44,15 +44,20 @@ class SearchNew implements Search{
 
         String path = "/v1/browse/new-releases";
         HttpRequest request = HttpRequest.newBuilder()
-                .header("Authorization", "Bearer " + token.replaceAll("access_token:", ""))
+                .header("Authorization", "Bearer " + token)
                 .header("Content-Type", "application/json")
                 .uri(URI.create(String.format("%s%s", resource, path)))
                 .GET()
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
         if (response.statusCode() == 200) {
             parseResponse(response.body());
+        } else {
+            JsonObject jo = JsonParser.parseString(response.body()).getAsJsonObject();
+            JsonObject error = jo.getAsJsonObject("error");
+            System.out.println(error.getAsJsonObject().get("message").getAsString());
         }
 
     }
@@ -79,7 +84,6 @@ class SearchNew implements Search{
 
     @Override
     public void printResult() {
-        System.out.println(print);
     }
 }
 
@@ -100,17 +104,20 @@ class SearchFeatured implements Search{
 
         String path = "/v1/browse/featured-playlists";
         HttpRequest request = HttpRequest.newBuilder()
-                .header("Authorization", "Bearer " + token.replaceAll("access_token:", ""))
+                .header("Authorization", "Bearer " + token)
                 .header("Content-Type", "application/json")
                 .uri(URI.create(String.format("%s%s", resource, path)))
                 .GET()
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
         if (response.statusCode() == 200) {
             parseResponse(response.body());
         } else {
-            System.out.println(response.statusCode());
+            JsonObject jo = JsonParser.parseString(response.body()).getAsJsonObject();
+            JsonObject error = jo.getAsJsonObject("error");
+            System.out.println(error.getAsJsonObject().get("message").getAsString());
         }
     }
 
@@ -135,11 +142,11 @@ class SearchFeatured implements Search{
 
 class SearchCategories implements Search{
 
-    private final String resource;
+    final String resource;
 
-    private final String token;
+    final String token;
 
-    final private String path = "/v1/browse/categories";
+    final String path = "/v1/browse/categories";
 
     public SearchCategories(String resource, String token) {
         this.resource = resource;
@@ -148,21 +155,14 @@ class SearchCategories implements Search{
 
     @Override
     public void makeRequest() throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .header("Authorization", "Bearer " + token.replaceAll("access_token:", ""))
-                .header("Content-Type", "application/json")
-                .uri(URI.create(String.format("%s%s", resource, path)))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = new Request(resource, path, token).getRequest();
 
         if (response.statusCode() == 200) {
             parseResponse(response.body());
         } else {
-            System.out.println(response.statusCode());
+            JsonObject jo = JsonParser.parseString(response.body()).getAsJsonObject();
+            JsonObject error = jo.getAsJsonObject("error");
+            System.out.println(error.getAsJsonObject().get("message").getAsString());
         }
     }
 
@@ -174,6 +174,7 @@ class SearchCategories implements Search{
 
         for(JsonElement item : items) {
             System.out.println(item.getAsJsonObject().get("name").getAsString());
+            System.out.println(item.getAsJsonObject().get("id").getAsString());
         }
     }
 
@@ -187,6 +188,8 @@ class SearchPlaylist implements Search{
     private String resource;
     private String token;
 
+    final private String path = "v1/browse/categories/{category_id}/playlists";
+
     public SearchPlaylist(String list, String resource, String token) {
         this.list = list;
         this.resource = resource;
@@ -195,7 +198,24 @@ class SearchPlaylist implements Search{
 
     @Override
     public void makeRequest() throws InterruptedException, IOException {
+        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
 
+        HttpRequest request = HttpRequest.newBuilder()
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .uri(URI.create(String.format("%s%s", resource, path)))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            parseResponse(response.body());
+        } else {
+            JsonObject jo = JsonParser.parseString(response.body()).getAsJsonObject();
+            JsonObject error = jo.getAsJsonObject("error");
+            System.out.println(error.getAsJsonObject().get("message").getAsString());
+        }
     }
 
     @Override
@@ -205,11 +225,7 @@ class SearchPlaylist implements Search{
 
     @Override
     public void printResult() {
-        System.out.printf("---%s %s---%n", list.toUpperCase(), Mode.PLAYLISTS.getName());
-        System.out.println("Walk Like A Badass");
-        System.out.println("Rage Beats");
-        System.out.println("Arab Mood Booster");
-        System.out.println("Sunday Stroll");
+
     }
 }
 

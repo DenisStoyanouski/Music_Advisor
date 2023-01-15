@@ -30,8 +30,6 @@ public class Main {
 class Engine {
     private static String accessToken;
 
-
-
     static void start(String ip, String resource) throws IOException, InterruptedException {
         String line = null;
         while (!"auth".equals(line)) {
