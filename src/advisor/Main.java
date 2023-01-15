@@ -54,7 +54,7 @@ class Engine {
                 final Search search = searchFactory.produce(request, resource, accessToken);
                 assert search != null;
                 if (search != null) {
-                    search.getRequest();
+                    search.makeRequest();
                 } else {
                     System.out.println("Unknown command");
                 }

@@ -13,10 +13,11 @@ import java.sql.SQLOutput;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 interface Search {
 
-    void getRequest() throws InterruptedException, IOException;
+    void makeRequest() throws InterruptedException, IOException;
 
     void parseResponse(String body);
 
@@ -41,8 +42,7 @@ class SearchNew implements Search{
     }
 
     @Override
-    public void getRequest() throws InterruptedException, IOException {
-        System.out.println(token);
+    public void makeRequest() throws InterruptedException, IOException {
 
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
 
@@ -100,22 +100,40 @@ class SearchFeatured implements Search{
     }
 
     @Override
-    public void getRequest() throws InterruptedException, IOException {
+    public void makeRequest() throws InterruptedException, IOException {
+        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
 
+        HttpRequest request = HttpRequest.newBuilder()
+                .header("Authorization", "Bearer " + token.replaceAll("access_token:", ""))
+                .header("Content-Type", "application/json")
+                .uri(URI.create(String.format("%s%s", resource, PATH)))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() == 200) {
+            parseResponse(response.body());
+        } else {
+            System.out.println(response.statusCode());
+        }
     }
 
     @Override
     public void parseResponse(String body) {
+        JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
+        JsonObject playlists = jo.getAsJsonObject("playlists");
+        JsonArray items = playlists.getAsJsonArray("items");
 
+        for(JsonElement item : items) {
+            System.out.println(item.getAsJsonObject().get("name").getAsString());
+            System.out.println(item.getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString());
+            System.out.println();
+        }
     }
 
     @Override
     public void printResult() {
-        System.out.printf("---%s---%n", Mode.FEATURED.getName());
-        System.out.println("Mellow Morning");
-        System.out.println("Wake Up and Smell the Coffee");
-        System.out.println("Monday Motivation");
-        System.out.println("Songs to Sing in the Shower");
+        System.out.println("end");
     }
 }
 
@@ -133,7 +151,7 @@ class SearchCategories implements Search{
     }
 
     @Override
-    public void getRequest() throws InterruptedException, IOException {
+    public void makeRequest() throws InterruptedException, IOException {
 
     }
 
@@ -164,7 +182,7 @@ class SearchPlaylist implements Search{
     }
 
     @Override
-    public void getRequest() throws InterruptedException, IOException {
+    public void makeRequest() throws InterruptedException, IOException {
 
     }
 
@@ -185,7 +203,7 @@ class SearchPlaylist implements Search{
 
 class Exit implements Search{
     @Override
-    public void getRequest() {
+    public void makeRequest() {
         printResult();
     }
 
