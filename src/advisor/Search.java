@@ -5,11 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -151,7 +147,6 @@ class SearchCategories implements Search{
 
         for(JsonElement item : items) {
             System.out.println(item.getAsJsonObject().get("name").getAsString());
-            System.out.println(item.getAsJsonObject().get("id").getAsString());
         }
     }
 
@@ -187,10 +182,10 @@ class SearchPlaylist implements Search{
             System.out.println(response.statusCode());
         }
 
-        if (categoryId == null || categoryId.matches("\\b[-._~:/?#\\]\\[@!$&'()*+,;=A-Za-z\\d]*\\b")) {
+        if (categoryId == null) {
             System.out.println("Unknown category name.");
         } else {
-            path = String.format("/v1/playlists/%s", categoryId);
+            path = String.format("/v1/browse/categories/%s/playlists", categoryId);
             HttpResponse<String> response1 = new Request(resource, path, token).getRequest();
             if (response.statusCode() == 200) {
                 parseResponse(response1.body());
@@ -203,17 +198,14 @@ class SearchPlaylist implements Search{
     @Override
     public void parseResponse(String body) {
         JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
-        JsonObject tracks = jo.getAsJsonObject("tracks");
+        JsonObject tracks = jo.getAsJsonObject("playlists");
         JsonArray items = tracks.getAsJsonArray("items");
 
         for(JsonElement item : items) {
-            item.getAsJsonObject().get("name").getAsString();
+            System.out.println(item.getAsJsonObject().get("name").getAsString());
+            System.out.println(item.getAsJsonObject().get("owner").getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString());
+
         }
-    }
-
-    @Override
-    public void printResult() {
-
     }
 
     public void getCategoryId(String body) {
@@ -224,9 +216,13 @@ class SearchPlaylist implements Search{
         for (JsonElement item : items) {
             if (item.getAsJsonObject().get("name").getAsString().equals(list)) {
                 categoryId = item.getAsJsonObject().get("id").getAsString();
-                System.out.println(categoryId);
             }
         }
+    }
+
+    @Override
+    public void printResult() {
+
     }
 }
 
