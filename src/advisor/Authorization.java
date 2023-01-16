@@ -14,6 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.Random;
 
 class Authorization {
 
@@ -23,7 +24,9 @@ class Authorization {
 
     final private static String CLIENT_SECRET = "97b69291dd9342b8a61250a8bd6a4778";
 
-    final private static String REDIRECT_URI = "http://localhost:8888";
+    final private static String REDIRECT_URI = "http://localhost:";
+
+    private static int port;
 
     private static String code;
 
@@ -36,18 +39,22 @@ class Authorization {
 
 
     String isAuthorization() throws IOException, InterruptedException {
+        Random rand = new Random();
+        port = rand.nextInt(8000) + 5000;
+
         System.out.println("use this link to request the access code:");
-        System.out.printf("%s/authorize?client_id=%s&redirect_uri=%s&response_type=code%n", ip, CLIENT_ID, REDIRECT_URI);
+        System.out.printf("%s/authorize?client_id=%s&redirect_uri=%s%d&response_type=code%n", ip, CLIENT_ID, REDIRECT_URI, port);
         getCode();
-        Thread.sleep(10000);
+        Thread.sleep(5000);
         getAccessToken();
         return accessToken;
     }
 
     private void getCode() throws IOException {
         System.out.println("waiting for code...");
+
         HttpServer server = HttpServer.create();
-        server.bind(new InetSocketAddress(8888), 50);
+        server.bind(new InetSocketAddress(port), 50);
         server.createContext("/",
                 new HttpHandler() {
                     public void handle(HttpExchange exchange) throws IOException {
