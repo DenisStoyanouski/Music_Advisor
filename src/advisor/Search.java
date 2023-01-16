@@ -77,7 +77,7 @@ class SearchFeatured implements Search{
 
     private final String token;
 
-    private String path = "/v1/browse/featured-playlists";
+    final private String PATH = "/v1/browse/featured-playlists";
 
     public SearchFeatured(String resource, String token) {
         this.resource = resource;
@@ -87,7 +87,7 @@ class SearchFeatured implements Search{
     @Override
     public void makeRequest() throws InterruptedException, IOException {
 
-        HttpResponse<String> response = new Request(resource, path, token).getRequest();
+        HttpResponse<String> response = new Request(resource, PATH, token).getRequest();
 
         if (response.statusCode() == 200) {
             parseResponse(response.body());
@@ -280,7 +280,7 @@ enum Mode {
     PLAYLISTS("PLAYLISTS"),
     EXIT("GOODBYE!");
     
-    String name;
+    final String name;
     
     Mode(String name) {
         this.name = name;

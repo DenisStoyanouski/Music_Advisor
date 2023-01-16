@@ -32,18 +32,17 @@ class Engine {
 
     static void start(String ip, String resource) throws IOException, InterruptedException {
         String line = null;
-        while (!"auth".equals(line)) {
+        do {
             line = input();
             if ("auth".equals(line)) {
-                Authorization authorization = new Authorization(ip);
-                accessToken = authorization.isAuthorization();
+                accessToken = new Authorization(ip).isAuthorization();
                 break;
             } else if ("exit".equals(line)) {
                 System.exit(0);
             } else {
                 System.out.println("Please, provide access for application.");
             }
-        }
+        } while (!"auth".equals(line));
 
         if (!accessToken.isEmpty()) {
             while (true) {

@@ -74,7 +74,7 @@ class Authorization {
     }
 
     private void getAccessToken() throws IOException, InterruptedException {
-        System.out.println("making http request for access_token...");
+        System.out.println("Making http request for access_token...");
         String encoded = Base64.getEncoder().encodeToString(String.format("%s:%s",CLIENT_ID, CLIENT_SECRET).getBytes());
 
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
@@ -98,7 +98,6 @@ class Authorization {
     private String parseToken(String body) {
         JsonElement jsonElement = JsonParser.parseString(body);
         JsonObject jsonObject = jsonElement.getAsJsonObject();
-        System.out.println(jsonObject.get("access_token"));
         return jsonObject.get("access_token").getAsString();
     }
 }
