@@ -41,12 +41,14 @@ class Authorization {
     String isAuthorization() throws IOException, InterruptedException {
         Random rand = new Random();
         port = rand.nextInt(8000) + 5000;
+        port = 8888;
 
         System.out.println("use this link to request the access code:");
         System.out.printf("%s/authorize?client_id=%s&redirect_uri=%s%d&response_type=code%n", ip, CLIENT_ID, REDIRECT_URI, port);
         getCode();
         Thread.sleep(5000);
         getAccessToken();
+        Thread.sleep(5000);
         return accessToken;
     }
 
@@ -90,15 +92,13 @@ class Authorization {
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .header("Authorization", "Basic " + encoded)
                 .uri(URI.create(String.format("%s/api/token", ip)))
-                .POST(HttpRequest.BodyPublishers.ofString(String.format("grant_type=authorization_code&code=%s&redirect_uri=%s", code, REDIRECT_URI)))
+                .POST(HttpRequest.BodyPublishers.ofString(String.format("grant_type=authorization_code&code=%s&redirect_uri=%s%d", code, REDIRECT_URI, port)))
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() == 200) {
+        if (response.statusCode() == 200 && response.body().contains("access_token")) {
             accessToken = parseToken(response.body());
-        }
-        if (accessToken.contains("access_token")) {
-            System.out.println("Success!");
+            System.out.println(accessToken);
         }
     }
 

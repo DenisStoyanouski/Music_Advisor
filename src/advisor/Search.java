@@ -48,22 +48,24 @@ class SearchNew implements Search {
 
     @Override
     public void parseResponse(String body) {
+        Viewer viewer = new Viewer();
         JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
         JsonObject albumsObj = jo.getAsJsonObject("albums");
         JsonArray itemsObj = albumsObj.getAsJsonArray("items");
 
         for (JsonElement item : itemsObj) {
             JsonObject itemObj = item.getAsJsonObject();
-            System.out.println(itemObj.get("name").getAsString());
+            String name = itemObj.get("name").getAsString();
             JsonArray artists = itemObj.get("artists").getAsJsonArray();
             List<String> artistList = new ArrayList<>();
             for (JsonElement artist : artists) {
                 artistList.add(artist.getAsJsonObject().get("name").getAsString());
             }
-            System.out.println(artistList);
-            System.out.println(itemObj.get("external_urls").getAsJsonObject().get("spotify").getAsString());
-            System.out.println();
+            String art = String.valueOf(artistList);
+            String url = itemObj.get("external_urls").getAsJsonObject().get("spotify").getAsString();
+            viewer.readData(name, art, url);
         }
+        viewer.startView();
     }
 
     @Override
