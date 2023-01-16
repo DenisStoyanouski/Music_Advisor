@@ -182,7 +182,6 @@ class SearchPlaylist implements Search{
             JsonObject jo = JsonParser.parseString(response.body()).getAsJsonObject();
             System.out.println(jo.get("error").getAsJsonObject().get("message").getAsString());
         }
-
         if (categoryId == null) {
             System.out.println("Unknown category name.");
         } else {
@@ -216,7 +215,6 @@ class SearchPlaylist implements Search{
     public void getCategoryId(String body) {
         JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
         try {
-
             JsonObject playlists = jo.getAsJsonObject("categories");
             JsonArray items = playlists.getAsJsonArray("items");
 

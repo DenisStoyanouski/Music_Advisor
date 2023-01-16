@@ -10,6 +10,8 @@ public class Main {
     private static String ip;
     private static String resource;
 
+    private static String page;
+
     private static final Map<String, String> arguments = new HashMap<>();
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -23,6 +25,7 @@ public class Main {
         }
         ip = arguments.getOrDefault("access", "https://accounts.spotify.com");
         resource = arguments.getOrDefault("resource", "https://api.spotify.com");
+        page = arguments.getOrDefault("page", "5");
     }
 
 
