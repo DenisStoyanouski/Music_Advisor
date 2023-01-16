@@ -176,10 +176,11 @@ class SearchPlaylist implements Search{
         //get {category_id}
         HttpResponse<String> response = new Request(resource, path, token).getRequest();
 
-        if (response.statusCode() == 200) {
+        if (response.statusCode() == 200 && !response.body().contains("error")) {
             getCategoryId(response.body());
-        } else {
-            System.out.println(response.statusCode());
+        } else if (response.statusCode() >= 400 || response.body().contains("error")) {
+            JsonObject jo = JsonParser.parseString(response.body()).getAsJsonObject();
+            System.out.println(jo.get("error").getAsJsonObject().get("message").getAsString());
         }
 
         if (categoryId == null) {
@@ -187,12 +188,11 @@ class SearchPlaylist implements Search{
         } else {
             path = String.format("/v1/browse/categories/%s/playlists", categoryId);
             HttpResponse<String> response1 = new Request(resource, path, token).getRequest();
-            if (response.statusCode() == 200) {
+            if (response.statusCode() == 200 && !response.body().contains("error")) {
                 parseResponse(response1.body());
-            } else {
+            } else if (response.statusCode() >= 400 || response.body().contains("error")){
                 JsonObject jo = JsonParser.parseString(response1.body()).getAsJsonObject();
                 System.out.println(jo.get("error").getAsJsonObject().get("message").getAsString());
-                /*{"error":{"status":404,"message":"Specified id doesn't exist"}}*/
             }
         }
     }
@@ -200,25 +200,35 @@ class SearchPlaylist implements Search{
     @Override
     public void parseResponse(String body) {
         JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
-        JsonObject tracks = jo.getAsJsonObject("playlists");
-        JsonArray items = tracks.getAsJsonArray("items");
+        try {
+            JsonObject tracks = jo.getAsJsonObject("playlists");
+            JsonArray items = tracks.getAsJsonArray("items");
 
-        for(JsonElement item : items) {
-            System.out.println(item.getAsJsonObject().get("name").getAsString());
-            System.out.println(item.getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString());
+            for(JsonElement item : items) {
+                System.out.println(item.getAsJsonObject().get("name").getAsString());
+                System.out.println(item.getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString());
+            }
+        } catch (NullPointerException e) {
+            System.out.println(jo.get("error").getAsJsonObject().get("message").getAsString());
         }
     }
 
     public void getCategoryId(String body) {
         JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
-        JsonObject playlists = jo.getAsJsonObject("categories");
-        JsonArray items = playlists.getAsJsonArray("items");
+        try {
 
-        for (JsonElement item : items) {
-            if (item.getAsJsonObject().get("name").getAsString().equals(list)) {
-                categoryId = item.getAsJsonObject().get("id").getAsString();
+            JsonObject playlists = jo.getAsJsonObject("categories");
+            JsonArray items = playlists.getAsJsonArray("items");
+
+            for (JsonElement item : items) {
+                if (item.getAsJsonObject().get("name").getAsString().equals(list)) {
+                    categoryId = item.getAsJsonObject().get("id").getAsString();
+                }
             }
+        } catch (NullPointerException e) {
+            System.out.println(jo.get("error").getAsJsonObject().get("message").getAsString());
         }
+
     }
 
     @Override
