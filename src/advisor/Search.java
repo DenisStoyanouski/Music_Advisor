@@ -162,7 +162,7 @@ class SearchPlaylist implements Search{
 
     private String categoryId;
 
-    private String path; // v1/browse/categories/{category_id}/playlists
+    private String path;
 
     public SearchPlaylist(String list, String resource, String token) {
         this.list = list;
@@ -190,7 +190,9 @@ class SearchPlaylist implements Search{
             if (response.statusCode() == 200) {
                 parseResponse(response1.body());
             } else {
-                System.out.println(response1.statusCode());
+                JsonObject jo = JsonParser.parseString(response1.body()).getAsJsonObject();
+                System.out.println(jo.get("error").getAsJsonObject().get("message").getAsString());
+                /*{"error":{"status":404,"message":"Specified id doesn't exist"}}*/
             }
         }
     }
@@ -203,8 +205,7 @@ class SearchPlaylist implements Search{
 
         for(JsonElement item : items) {
             System.out.println(item.getAsJsonObject().get("name").getAsString());
-            System.out.println(item.getAsJsonObject().get("owner").getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString());
-
+            System.out.println(item.getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString());
         }
     }
 
