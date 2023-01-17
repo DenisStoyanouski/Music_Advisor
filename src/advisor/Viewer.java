@@ -24,16 +24,25 @@ class Viewer {
 
     private void printPage() {
 
-        if (currentItem < items.size()) {
+        if (currentItem < items.size() && currentItem >= 0) {
             int limit = Math.min(currentPage * page, items.size() - 1);
             for (int i = currentItem; i <= limit; i++) {
                 for (String str : items.get(i)) {
                     System.out.println(str);
                 }
+                if (items.get(i).size() > 1) {
+                    System.out.println();
+                }
             }
-            System.out.printf("---PAGE %d OF %d---%n", currentPage++, items.size() / page);
+            System.out.printf("---PAGE %d OF %d---%n", currentPage, items.size() / page);
+        } else if (currentItem >=0) {
+            currentItem -= page;
+            currentPage--;
+            printPage();
         } else {
-            System.out.println("next");
+            currentItem += page;
+            currentPage++;
+            printPage();
         }
 
     }
@@ -45,11 +54,12 @@ class Viewer {
             switch (command) {
                 case "next" :
                     currentItem += page;
+                    currentPage++;
                     printPage();
                     break;
                 case "prev" :
                     currentItem -= page;
-                    currentPage -= 1;
+                    currentPage--;
                     printPage();
                 break;
                 case "exit" : break;
