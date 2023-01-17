@@ -16,8 +16,7 @@ class Viewer {
     }
 
     public void readData(String... values) {
-        ArrayList<String> item = new ArrayList<>();
-        item.addAll(Arrays.asList(values));
+        ArrayList<String> item = new ArrayList<>(Arrays.asList(values));
         items.add(item);
     }
 
@@ -28,9 +27,9 @@ class Viewer {
 
     private void printPage() {
 
-        if (currentItem < items.size() && currentItem >= 0) {
-            int limit = Math.min(currentPage * page, items.size() - 1);
-            for (int i = currentItem; i <= limit; i++) {
+        if (currentItem <= items.size() && currentItem > 0) {
+            int limit = Math.min(currentPage * page, items.size());
+            for (int i = currentItem - 1; i <= limit - 1; i++) {
                 for (String str : items.get(i)) {
                     System.out.println(str);
                 }
@@ -38,15 +37,13 @@ class Viewer {
                     System.out.println();
                 }
             }
-            System.out.printf("---PAGE %d OF %d---%n", currentPage, items.size() / page + 1);
-        } else if (currentItem >=0) {
+            System.out.printf("---PAGE %d OF %d---%n", currentPage, page == 1 ? items.size() : items.size() / page + 1);
+        } else if (currentItem > 1) {
             currentItem -= page;
             currentPage--;
             printPage();
         } else {
-            currentItem += page;
-            currentPage++;
-            printPage();
+            System.out.println("No more pages");
         }
 
     }
@@ -59,12 +56,24 @@ class Viewer {
                 case "next" :
                     currentItem += page;
                     currentPage++;
-                    printPage();
+                    if ((page == 1 ? items.size() : items.size() / page + 1) < currentPage) {
+                        System.out.println("No more pages");
+                        currentItem -= page;
+                        currentPage--;
+                    } else {
+                        printPage();
+                    }
                     break;
                 case "prev" :
                     currentItem -= page;
                     currentPage--;
-                    printPage();
+                    if(currentPage > 0) {
+                        printPage();
+                    } else {
+                        System.out.println("No more pages");
+                        currentItem += page;
+                        currentPage++;
+                    }
                 break;
                 case "exit" : break;
                 default :
