@@ -38,7 +38,7 @@ class Viewer {
                     System.out.println();
                 }
             }
-            System.out.printf("---PAGE %d OF %d---%n", currentPage, items.size() / page);
+            System.out.printf("---PAGE %d OF %d---%n", currentPage, items.size() / page + 1);
         } else if (currentItem >=0) {
             currentItem -= page;
             currentPage--;

@@ -38,7 +38,7 @@ class Engine {
             line = input();
             if ("auth".equals(line)) {
                 accessToken = new Authorization(ip).isAuthorization();
-
+                System.out.println("Success!");
                 break;
             } else if ("exit".equals(line)) {
                 System.exit(0);
