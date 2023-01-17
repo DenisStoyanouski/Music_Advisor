@@ -48,7 +48,7 @@ class SearchNew implements Search {
 
     @Override
     public void parseResponse(String body) {
-        Viewer viewer = new Viewer();
+        Viewer viewer = new Viewer(Main.page);
         JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
         JsonObject albumsObj = jo.getAsJsonObject("albums");
         JsonArray itemsObj = albumsObj.getAsJsonArray("items");
@@ -100,15 +100,17 @@ class SearchFeatured implements Search{
 
     @Override
     public void parseResponse(String body) {
+        Viewer viewer = new Viewer(Main.page);
         JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
         JsonObject playlists = jo.getAsJsonObject("playlists");
         JsonArray items = playlists.getAsJsonArray("items");
 
         for(JsonElement item : items) {
-            System.out.println(item.getAsJsonObject().get("name").getAsString());
-            System.out.println(item.getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString());
-            System.out.println();
+            String name = item.getAsJsonObject().get("name").getAsString();
+            String url = item.getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString();
+            viewer.readData(name, url);
         }
+        viewer.startView();
     }
 
     @Override
@@ -143,13 +145,16 @@ class SearchCategories implements Search{
 
     @Override
     public void parseResponse(String body) {
+
+        Viewer viewer = new Viewer(Main.page);
         JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
         JsonObject playlists = jo.getAsJsonObject("categories");
         JsonArray items = playlists.getAsJsonArray("items");
 
         for(JsonElement item : items) {
-            System.out.println(item.getAsJsonObject().get("name").getAsString());
+            viewer.readData(item.getAsJsonObject().get("name").getAsString());
         }
+        viewer.startView();
     }
 
     @Override
@@ -200,15 +205,18 @@ class SearchPlaylist implements Search{
 
     @Override
     public void parseResponse(String body) {
+        Viewer viewer = new Viewer(Main.page);
         JsonObject jo = JsonParser.parseString(body).getAsJsonObject();
         try {
             JsonObject tracks = jo.getAsJsonObject("playlists");
             JsonArray items = tracks.getAsJsonArray("items");
 
             for(JsonElement item : items) {
-                System.out.println(item.getAsJsonObject().get("name").getAsString());
-                System.out.println(item.getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString());
+                String name = item.getAsJsonObject().get("name").getAsString();
+                String url = item.getAsJsonObject().get("external_urls").getAsJsonObject().get("spotify").getAsString();
+                viewer.readData(name, url);
             }
+            viewer.startView();
         } catch (NullPointerException e) {
             System.out.println(jo.get("error").getAsJsonObject().get("message").getAsString());
         }

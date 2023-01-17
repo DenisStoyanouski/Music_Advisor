@@ -5,11 +5,15 @@ import java.util.Arrays;
 
 class Viewer {
 
-    private int page = 5;
+    private int page;
     private int currentPage = 1;
 
     private int currentItem = 1;
     private final ArrayList<ArrayList<String>> items = new ArrayList<>();
+
+    Viewer(int page) {
+        this.page = page;
+    }
 
     public void readData(String... values) {
         ArrayList<String> item = new ArrayList<>();
