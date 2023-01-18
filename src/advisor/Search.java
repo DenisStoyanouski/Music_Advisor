@@ -224,7 +224,7 @@ class SearchPlaylist implements Search{
 class Exit implements Search{
     @Override
     public void makeRequest() {
-        System.out.println("---GOODBYE!---%n");
+        System.out.println("---GOODBYE!---");
         System.exit(0);
     }
 
@@ -257,7 +257,6 @@ class SearchFactory {
                 System.out.println("new, featured, categories, playlists <name>, exit");
                 break;
             }
-            return null;
-            
+        return null;
     }
 }
