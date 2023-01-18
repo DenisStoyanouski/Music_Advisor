@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 interface Search {
@@ -269,9 +270,7 @@ class SearchFactory {
     static Search produce(String[] request, String resource, String token) {
         StringBuilder listName = new StringBuilder();
         if (request.length > 1) {
-            for (int i = 1; i < request.length; i++) {
-                listName.append(request[i]).append(" ");
-            }
+            Arrays.stream(request).forEach(x -> listName.append(x).append(" "));
         }
 
         switch(request[0]) {
@@ -285,7 +284,9 @@ class SearchFactory {
                 break;
                 }
             case "exit" : return new Exit();
-            default : break;
+            default :
+                System.out.println("new, featured, categories, playlists <name>, exit");
+                break;
             }
             return null;
             

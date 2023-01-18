@@ -19,7 +19,7 @@ public class Main {
     }
 
     private static void getArguments(String[] args) {
-        for (int i = 0; i < args.length; i += 2) {
+        for (int i = 0; i < (args.length % 2 == 0 ? args.length : args.length - 1); i += 2) {
             arguments.put(args[i].replaceAll("-",""), args[i + 1]);
         }
         ip = arguments.getOrDefault("access", "https://accounts.spotify.com");

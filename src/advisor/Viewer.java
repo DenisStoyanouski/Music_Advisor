@@ -30,9 +30,7 @@ class Viewer {
         if (currentItem <= items.size() && currentItem > 0) {
             int limit = Math.min(currentPage * page, items.size());
             for (int i = currentItem - 1; i <= limit - 1; i++) {
-                for (String str : items.get(i)) {
-                    System.out.println(str);
-                }
+                items.get(i).forEach(System.out::println);
                 if (items.get(i).size() > 1) {
                     System.out.println();
                 }

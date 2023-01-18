@@ -40,15 +40,15 @@ class Authorization {
 
     String isAuthorization() throws InterruptedException {
         Random rand = new Random();
-        port = rand.nextInt(8000) + 5000;
-        //port = 8888;
+        //port = rand.nextInt(8000) + 5000;
+        port = 8888;
 
         System.out.println("use this link to request the access code:");
         System.out.printf("%s/authorize?client_id=%s&redirect_uri=%s%d&response_type=code%n", ip, CLIENT_ID, REDIRECT_URI, port);
         getCode();
-        Thread.sleep(3000);
+        Thread.sleep(5000);
         getAccessToken();
-        Thread.sleep(3000);
+        //Thread.sleep(10000);
         return accessToken;
     }
 
@@ -90,7 +90,7 @@ class Authorization {
         System.out.println("Making http request for access_token...");
         String encoded = Base64.getEncoder().encodeToString(String.format("%s:%s",CLIENT_ID, CLIENT_SECRET).getBytes());
 
-        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(500L)).build();
+        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(1000L)).build();
 
         HttpRequest request = HttpRequest.newBuilder()
                 .header("Content-Type", "application/x-www-form-urlencoded")
