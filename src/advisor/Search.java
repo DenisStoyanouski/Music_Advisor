@@ -15,10 +15,6 @@ interface Search {
     void makeRequest() throws InterruptedException, IOException;
 
     void parseResponse(String body);
-
-    void printResult();
-
-
 }
 
 class SearchNew implements Search {
@@ -68,10 +64,6 @@ class SearchNew implements Search {
         }
         viewer.startView();
     }
-
-    @Override
-    public void printResult() {
-    }
 }
 
 class SearchFeatured implements Search{
@@ -79,8 +71,6 @@ class SearchFeatured implements Search{
     private final String resource;
 
     private final String token;
-
-    final private String PATH = "/v1/browse/featured-playlists";
 
     public SearchFeatured(String resource, String token) {
         this.resource = resource;
@@ -90,6 +80,7 @@ class SearchFeatured implements Search{
     @Override
     public void makeRequest() throws InterruptedException, IOException {
 
+        String PATH = "/v1/browse/featured-playlists";
         HttpResponse<String> response = new Request(resource, PATH, token).getRequest();
 
         if (response.statusCode() == 200) {
@@ -114,10 +105,6 @@ class SearchFeatured implements Search{
         viewer.startView();
     }
 
-    @Override
-    public void printResult() {
-        System.out.println("end");
-    }
 }
 
 class SearchCategories implements Search{
@@ -157,20 +144,14 @@ class SearchCategories implements Search{
         }
         viewer.startView();
     }
-
-    @Override
-    public void printResult() {
-    }
 }
 
 class SearchPlaylist implements Search{
-    private String list;
-    private String resource;
-    private String token;
+    final private String list;
+    final private String resource;
+    final private String token;
 
     private String categoryId;
-
-    private String path;
 
     public SearchPlaylist(String list, String resource, String token) {
         this.list = list;
@@ -180,7 +161,7 @@ class SearchPlaylist implements Search{
 
     @Override
     public void makeRequest() throws InterruptedException, IOException {
-        path = "/v1/browse/categories";
+        String path = "/v1/browse/categories";
         //get {category_id}
         HttpResponse<String> response = new Request(resource, path, token).getRequest();
 
@@ -237,30 +218,18 @@ class SearchPlaylist implements Search{
         } catch (NullPointerException e) {
             System.out.println(jo.get("error").getAsJsonObject().get("message").getAsString());
         }
-
-    }
-
-    @Override
-    public void printResult() {
-
     }
 }
 
 class Exit implements Search{
     @Override
     public void makeRequest() {
-        printResult();
+        System.out.println("---GOODBYE!---%n");
+        System.exit(0);
     }
 
     @Override
     public void parseResponse(String body) {
-
-    }
-
-    @Override
-    public void printResult() {
-        System.out.printf("---%s---%n", Mode.EXIT.getName());
-        System.exit(0);
     }
 }
 
@@ -290,23 +259,5 @@ class SearchFactory {
             }
             return null;
             
-    }
-}
-
-enum Mode {
-    NEW ("NEW RELEASES"),
-    FEATURED ("FEATURED"),
-    CATEGORIES("CATEGORIES"),
-    PLAYLISTS("PLAYLISTS"),
-    EXIT("GOODBYE!");
-    
-    final String name;
-    
-    Mode(String name) {
-        this.name = name;
-    }
-    
-    public String getName() {
-        return name;
     }
 }

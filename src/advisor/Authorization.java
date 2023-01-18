@@ -48,7 +48,6 @@ class Authorization {
         getCode();
         Thread.sleep(5000);
         getAccessToken();
-        //Thread.sleep(10000);
         return accessToken;
     }
 
